@@ -69,8 +69,22 @@ export default class Scenario1 extends Scene{
     }
 
     // Fonction pour dessiner les aiguilles
-    drawHand(width , length, position) {
-        const angle = (new Date().getHours() % 12 + new Date().getMinutes() / 60) * 2 * Math.PI / position - Math.PI / 2;
+    drawHand(width , length, timeUnit) {
+
+        const date = new Date();
+        let time;
+        switch(timeUnit) {
+            case 'hours':
+                time = date.getHours() % 12 + date.getMinutes() / 60;
+                break;
+            case 'minutes':
+                time = date.getMinutes() + date.getSeconds() / 60;
+                break;
+            case 'seconds':
+                time = date.getSeconds() + date.getMilliseconds() / 1000;
+                break;
+        }
+        const angle = (time * 2 * Math.PI / (timeUnit === 'hours' ? 12 : 60) - Math.PI / 2) * this.params.speed;
 
         this.context.beginPath();
         this.context.moveTo(this.width / 2, this.height / 2);
@@ -86,12 +100,11 @@ export default class Scenario1 extends Scene{
         this.drawHoursGraduation();
         this.drawMinutesGraduation();
         this.drawCenterPoint();
-        this.drawHand(this.params.handWidth, 0.50, 12); // Heures
-        this.drawHand(this.params.handWidth, 0.65, 60); // Minutes
-        this.drawHand(this.params.handWidth, 0.85, 5); // Secondes
+        this.drawHand(this.params.handWidth, 0.50, 'hours'); // Heures
+        this.drawHand(this.params.handWidth, 0.625, 'minutes'); // Minutes
+        this.drawHand(this.params.handWidth, 0.80, 'seconds'); // Secondes
 
         this.arcs.forEach(arc => {
-            arc.update(this.globalContext.time.delta, this.params.speed);
             arc.draw(this.context, this.params.color, this.params.lineWidth);
         })
 
@@ -99,8 +112,8 @@ export default class Scenario1 extends Scene{
     resize() {
         super.resize();
         this.mainRadius = Math.min(this.width, this.height);
-        this.mainRadius/= 2;
-        this.mainRadius*= 0.65;
+        this.mainRadius /= 2;
+        this.mainRadius *= 0.65;
         this.deltaRadius = this.mainRadius * 0.075;
 
         if (!!this.arcs) {
