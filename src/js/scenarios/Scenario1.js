@@ -1,5 +1,7 @@
 import Scene from "../canvas2d/Scene";
 import {RotatingArc} from "../canvas2d/shapes/arcs";
+import {Hands} from "../canvas2d/shapes/hands";
+import {CenterPoint} from "../canvas2d/shapes/centerPoint";
 import {deg2rad, randomRange} from "../utils/MathUtils";
 
 export default class Scenario1 extends Scene{
@@ -31,6 +33,7 @@ export default class Scenario1 extends Scene{
             const arc_ = new RotatingArc( x_, y_, radius_, angle0_, angle1_ );
             this.arcs.push(arc_);
         }
+        const centerPoint = new CenterPoint(this.width, this.height, this.context, this.params.color);
     }
 
     drawHoursGraduation(nGraduations =  12, arcLenght = 1.5) {
@@ -95,14 +98,15 @@ export default class Scenario1 extends Scene{
         this.context.closePath();
     }
     update() {
+        const Hand= new Hands(this.width, this.height, this.mainRadius, this.params.handWidth);
         if (!super.update()) return;
         this.clear();
         this.drawHoursGraduation();
         this.drawMinutesGraduation();
         this.drawCenterPoint();
-        this.drawHand(this.params.handWidth, 0.50, 'hours'); // Heures
-        this.drawHand(this.params.handWidth, 0.625, 'minutes'); // Minutes
-        this.drawHand(this.params.handWidth, 0.80, 'seconds'); // Secondes
+        Hand.draw(this.context, 'hours', 0.40); // Heures
+        Hand.draw(this.context, 'minutes', 0.60); // Minutes
+        Hand.draw(this.context, 'seconds', 0.80); // Secondes
 
         this.arcs.forEach(arc => {
             arc.draw(this.context, this.params.color, this.params.lineWidth);
