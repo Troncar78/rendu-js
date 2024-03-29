@@ -3,6 +3,7 @@ import {RotatingArc} from "../canvas2d/shapes/arcs";
 import {Hands} from "../canvas2d/shapes/hands";
 import {CenterPoint} from "../canvas2d/shapes/centerPoint";
 import {deg2rad, randomRange} from "../utils/MathUtils";
+import {Graduation} from "../canvas2d/shapes/Graduation";
 
 export default class Scenario1 extends Scene{
     constructor(id = "canvas-scene") {
@@ -20,8 +21,9 @@ export default class Scenario1 extends Scene{
         }
 
         this.resize();
-        const nArcs = 1;
 
+        // Création du cadran
+        const nArcs = 1;
         this.arcs = [];
         for (let i= 0; i < nArcs; i++) {
             const x_ = this.width / 2;
@@ -33,86 +35,65 @@ export default class Scenario1 extends Scene{
             const arc_ = new RotatingArc( x_, y_, radius_, angle0_, angle1_ );
             this.arcs.push(arc_);
         }
-        const centerPoint = new CenterPoint(this.width, this.height, this.context, this.params.color);
-    }
 
-    drawHoursGraduation(nGraduations =  12, arcLenght = 1.5) {
-        for (let i = 0 ; i < nGraduations; i++) {
-            const angle_ = deg2rad(360) * i / nGraduations;
+        // Creation des graduations des heures
+        const nGraduationsHour = 12;
+        this.graduationHour = [];
+        for (let i = 0; i < nGraduationsHour; i++){
+            const angle_ = deg2rad(360) * i / nGraduationsHour;
             const x_ = this.width / 2 + (this.mainRadius - this.deltaRadius / 2) * Math.cos(angle_);
             const y_ = this.height / 2 + (this.mainRadius - this.deltaRadius / 2) * Math.sin(angle_);
-            const length_ = (this.arcs.length + arcLenght ) * this.deltaRadius;
+            const length_ = (this.arcs.length + 1) * this.deltaRadius;
 
-            this.context.save();
-            this.context.beginPath();
-
-            this.context.translate(x_, y_);
-            this.context.rotate(angle_);
-
-            this.context.moveTo(-length_ / 2, 0);
-            this.context.lineTo(length_ / 2, 0);
-
-            this.context.strokeStyle = this.params.color;
-            this.context.width = this.params.lineWidth;
-            this.context.stroke();
-            this.context.closePath();
-            this.context.restore();
+            const graduations_ = new Graduation(x_, y_, angle_, length_, this.params.lineWidth);
+            this.graduationHour.push(graduations_);
         }
-    }
-    drawMinutesGraduation() {
-        this.drawHoursGraduation(60, 0.25);
-    }
 
-    // Fonction pour dessiner le centre du cadran
-    drawCenterPoint() {
-        this.context.beginPath();
-        this.context.arc(this.width / 2, this.height / 2, 4, 0, 2 * Math.PI, false);
-        this.context.fillStyle = this.params.color;
-        this.context.fill();
-    }
+        // Creation des graduations des minutes
+        const nGraduationsMinute = 60;
+        this.graduationMinute = [];
+        for (let i = 0; i < nGraduationsMinute; i++){
+            const angle_ = deg2rad(360) * i / nGraduationsMinute;
+            const x_ = this.width / 2 + (this.mainRadius - this.deltaRadius / 2) * Math.cos(angle_);
+            const y_ = this.height / 2 + (this.mainRadius - this.deltaRadius / 2) * Math.sin(angle_);
+            const length_ = (this.arcs.length + 0.25) * this.deltaRadius;
 
-    // Fonction pour dessiner les aiguilles
-    drawHand(width , length, timeUnit) {
-
-        const date = new Date();
-        let time;
-        switch(timeUnit) {
-            case 'hours':
-                time = date.getHours() % 12 + date.getMinutes() / 60;
-                break;
-            case 'minutes':
-                time = date.getMinutes() + date.getSeconds() / 60;
-                break;
-            case 'seconds':
-                time = date.getSeconds() + date.getMilliseconds() / 1000;
-                break;
+            const graduations_ = new Graduation(x_, y_, angle_, length_, this.params.lineWidth);
+            this.graduationMinute.push(graduations_);
         }
-        const angle = (time * 2 * Math.PI / (timeUnit === 'hours' ? 12 : 60) - Math.PI / 2) * this.params.speed;
 
-        this.context.beginPath();
-        this.context.moveTo(this.width / 2, this.height / 2);
-        this.context.lineTo(this.width / 2 + this.mainRadius * length * Math.cos(angle), this.height / 2 + this.mainRadius * length * Math.sin(angle));
-        this.context.strokeStyle = this.params.color;
-        this.context.lineWidth = width;
-        this.context.stroke();
-        this.context.closePath();
+        // Creation du point central
+        this.centerPoint = new CenterPoint(this.width, this.height, this.context, this.params.color);
+
+        // Creation des aiguilles (heures, minutes, secondes)
+        this.Hand = new Hands(this.width, this.height, this.mainRadius, this.params.handWidth);
     }
+
+    //Affichage des éléments
     update() {
-        const Hand= new Hands(this.width, this.height, this.mainRadius, this.params.handWidth);
         if (!super.update()) return;
         this.clear();
-        this.drawHoursGraduation();
-        this.drawMinutesGraduation();
-        this.drawCenterPoint();
-        Hand.draw(this.context, 'hours', 0.40); // Heures
-        Hand.draw(this.context, 'minutes', 0.60); // Minutes
-        Hand.draw(this.context, 'seconds', 0.80); // Secondes
+        this.centerPoint.draw(); // Affichage du point central
+        this.Hand.draw(this.context, 'hours', 0.40, this.params.speed); // Affichage de l'aiguille des heures
+        this.Hand.draw(this.context, 'minutes', 0.60, this.params.speed); // Affichage de l'aiguille des minutes
+        this.Hand.draw(this.context, 'seconds', 0.80, this.params.speed); // Affichage de l'aiguille des secondes
 
+        // Affichage du cadran
         this.arcs.forEach(arc => {
             arc.draw(this.context, this.params.color, this.params.lineWidth);
         })
 
+        // Affichage des graduations
+        this.graduationHour.forEach(graduationHour => {
+            graduationHour.draw(this.context, this.params.color, this.params.lineWidth);
+        })
+        this.graduationMinute.forEach(graduationMinute => {
+            graduationMinute.draw(this.context, this.params.color, this.params.lineWidth);
+        })
+
     }
+
+    //Responsive
     resize() {
         super.resize();
         this.mainRadius = Math.min(this.width, this.height);
@@ -120,11 +101,30 @@ export default class Scenario1 extends Scene{
         this.mainRadius *= 0.65;
         this.deltaRadius = this.mainRadius * 0.075;
 
+        // Resize du cadran
         if (!!this.arcs) {
             this.arcs.forEach((arc, index) => {
                 arc.x = this.width / 2;
                 arc.y = this.height / 2;
                 arc.radius = this.mainRadius + (index - this.arcs.length / 2) * this.deltaRadius;
+            })
+        }
+
+        // Resize des graduations
+        if (!!this.graduationHour) {
+            this.graduationHour.forEach((graduationHour, index) => {
+                const angle_ = deg2rad(360) * index / this.graduationHour.length;
+                graduationHour.x = this.width / 2 + (this.mainRadius - this.deltaRadius / 2) * Math.cos(angle_);
+                graduationHour.y = this.height / 2 + (this.mainRadius - this.deltaRadius / 2) * Math.sin(angle_);
+                graduationHour.length = (this.arcs.length + 1) * this.deltaRadius;
+            })
+        }
+        if (!!this.graduationMinute) {
+            this.graduationMinute.forEach((graduationMinute, index) => {
+                const angle_ = deg2rad(360) * index / this.graduationMinute.length;
+                graduationMinute.x = this.width / 2 + (this.mainRadius - this.deltaRadius / 2) * Math.cos(angle_);
+                graduationMinute.y = this.height / 2 + (this.mainRadius - this.deltaRadius / 2) * Math.sin(angle_);
+                graduationMinute.length = (this.arcs.length + 0.10) * this.deltaRadius;
             })
         }
     }
