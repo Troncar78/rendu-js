@@ -16,8 +16,6 @@ export default class Scenario1 extends Scene{
         this.params.handWidth = 1.5; // = params taille des aiguilles
         if (this.debug.active) {
             this.debugFolder.add(this.params, 'speed', 0, 4, 0.25);
-            this.debugFolder.add(this.params, 'lineWidth', 1, 5, 0.3);
-            this.debugFolder.add(this.params, 'handWidth', 1, 5, 0.3);
             this.debugFolder.addColor(this.params, 'color')
         }
 
