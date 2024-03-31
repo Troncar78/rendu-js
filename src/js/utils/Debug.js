@@ -6,6 +6,11 @@ export default class Debug {
     constructor() {
         this.ui = null
         this.active = window.location.hash === '#debug'
+        window.addEventListener('hashchange', this.updateActive.bind(this));
+    }
+
+    updateActive() {
+        this.active = window.location.hash === '#debug'
     }
 
     set active(isUI) {

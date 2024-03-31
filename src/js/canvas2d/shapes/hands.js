@@ -6,7 +6,7 @@ export class Hands {
         this.width = width;
     }
 
-    draw(context, timeUnit , length, speed = 1) {
+    draw(context, timeUnit , length, speed, color){
         this.date = new Date();
         let time;
         switch(timeUnit) {
@@ -22,11 +22,12 @@ export class Hands {
         }
         const angle = (time * 2 * Math.PI / (timeUnit === 'hours' ? 12 : 60) - Math.PI / 2) * speed;
 
+
         context.save();
         context.beginPath();
         context.moveTo(this.x / 2, this.y / 2);
         context.lineTo(this.x / 2 + this.radius * length * Math.cos(angle), this.y / 2 + this.radius * length * Math.sin(angle));
-        context.strokeStyle = 'white';
+        context.strokeStyle = color;
         context.lineWidth = this.width;
         context.stroke();
         context.closePath();

@@ -11,13 +11,14 @@ export default class Scenario1 extends Scene{
 
         // debug
         this.params.speed = 1; // = params speed des arcs
-        this.params.color = 'white' ; // = params speed des arcs
+        this.params.color = "#ffffff" // = params speed des arcs
         this.params.lineWidth = 3; // = params taille lignes du cercle
         this.params.handWidth = 1.5; // = params taille des aiguilles
         if (this.debug.active) {
             this.debugFolder.add(this.params, 'speed', 0, 4, 0.25);
             this.debugFolder.add(this.params, 'lineWidth', 1, 5, 0.3);
             this.debugFolder.add(this.params, 'handWidth', 1, 5, 0.3);
+            this.debugFolder.addColor(this.params, 'color')
         }
 
         this.resize();
@@ -73,10 +74,10 @@ export default class Scenario1 extends Scene{
     update() {
         if (!super.update()) return;
         this.clear();
-        this.centerPoint.draw(); // Affichage du point central
-        this.Hand.draw(this.context, 'hours', 0.40, this.params.speed); // Affichage de l'aiguille des heures
-        this.Hand.draw(this.context, 'minutes', 0.60, this.params.speed); // Affichage de l'aiguille des minutes
-        this.Hand.draw(this.context, 'seconds', 0.80, this.params.speed); // Affichage de l'aiguille des secondes
+        this.centerPoint.draw(this.params.color); // Affichage du point central
+        this.Hand.draw(this.context, 'hours', 0.40, this.params.speed, this.params.color); // Affichage de l'aiguille des heures\
+        this.Hand.draw(this.context, 'minutes', 0.60, this.params.speed, this.params.color); // Affichage de l'aiguille des minutes
+        this.Hand.draw(this.context, 'seconds', 0.80, this.params.speed, this.params.color); // Affichage de l'aiguille des secondes
 
         // Affichage du cadran
         this.arcs.forEach(arc => {
